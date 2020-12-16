@@ -13,7 +13,7 @@ const articleSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  data: {
+  date: {
     type: String,
     required: true,
   },

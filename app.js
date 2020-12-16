@@ -8,13 +8,13 @@ require('dotenv').config();
 const app = express();
 const PORT = 3000;
 const cors = require('cors');
-const articleRoutes = require('./routes/articles.js');
-const userRoutes = require('./routes/users.js');
+const routes = require('./routes/index.js');
 
 const {
   login, newUser,
 } = require('./controllers/users.js');
 const { requestLogger, errorLogger } = require('./middlewares/logger.js');
+const error = require('./middlewares/error.js');
 
 const mongoDbUrl = 'mongodb://localhost:27017/diplomadb';
 const mongoConnectOptions = {
@@ -46,34 +46,23 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().min(2).max(30),
     password: Joi.string().required().min(2).max(30),
-    name: Joi.string().min(2).max(30),
+    name: Joi.string().required().min(2).max(30),
   }),
 }), newUser);
 
 app.use(auth);
-app.use('/', articleRoutes);
-app.use('/', userRoutes);
+app.use(routes);
+// app.use('/', articleRoutes);
+// app.use('/', userRoutes);
 
 app.use('*', (req, res) => {
   res.status(404).send({ message: 'The requested resource was not found!' });
 });
 
-app.use(errors());
-
 app.use(errorLogger);
 
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
+app.use(errors());
 
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === 500
-        ? 'An error occurred on the server'
-        : message,
-    });
-
-  next();
-});
+app.use(error);
 
 app.listen(PORT, () => {});

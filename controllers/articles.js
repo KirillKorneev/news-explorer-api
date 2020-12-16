@@ -1,11 +1,16 @@
 const Article = require('../models/article.js');
 const { NotFoundError } = require('../utils/NotFoundError.js');
 const { InvalidError } = require('../utils/InvalidError.js');
+const { ForbiddenError } = require('../utils/ForbiddenError.js');
 
 const getArticles = (req, res, next) => {
   Article.find({})
     .populate('owner')
-    .then((data) => res.status(200).send(data))
+    .then((data) => {
+      res.status(200).send(
+        data,
+      );
+    })
     .catch((err) => next(err));
 };
 
@@ -14,21 +19,21 @@ const postArticle = (req, res, next) => {
     keyword,
     title,
     text,
-    data,
+    date,
     source,
     link,
     image,
   } = req.body;
   const { id } = req.user;
   Article.create({
-    keyword, title, text, data, source, link, image, owner: id,
+    keyword, title, text, date, source, link, image, owner: id,
   })
     .then((article) => {
       res.status(200).send({ data: article });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        const error = InvalidError('Validation Error');
+        const error = new InvalidError('Validation Error');
         next(error);
       } else {
         next(err);
@@ -57,7 +62,7 @@ const deleteArticle = (req, res, next) => {
             }
           });
       } else {
-        const error = new InvalidError('It is not your article');
+        const error = new ForbiddenError('It is not your article');
         next(error);
       }
     })

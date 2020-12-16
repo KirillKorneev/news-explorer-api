@@ -8,6 +8,7 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 const { NotFoundError } = require('../utils/NotFoundError.js');
 const { InvalidError } = require('../utils/InvalidError.js');
 const { WrongAuth } = require('../utils/WrongAuth.js');
+const { ConflictError } = require('../utils/ConflictError.js');
 
 const getMyInfo = (req, res, next) => {
   User.findOne({ _id: req.user.id })
@@ -40,7 +41,7 @@ const newUser = (req, res, next) => {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        const err = new WrongAuth('This user already exists');
+        const err = new ConflictError('This user already exists');
         throw err;
       }
       return bcrypt.hash(password, 10);

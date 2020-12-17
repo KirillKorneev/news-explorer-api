@@ -16,6 +16,8 @@ const {
 const { requestLogger, errorLogger } = require('./middlewares/logger.js');
 const error = require('./middlewares/error.js');
 
+const { NotFoundError } = require('./utils/NotFoundError.js');
+
 const mongoDbUrl = 'mongodb://localhost:27017/diplomadb';
 const mongoConnectOptions = {
   useNewUrlParser: true,
@@ -52,11 +54,10 @@ app.post('/signup', celebrate({
 
 app.use(auth);
 app.use(routes);
-// app.use('/', articleRoutes);
-// app.use('/', userRoutes);
 
-app.use('*', (req, res) => {
-  res.status(404).send({ message: 'The requested resource was not found!' });
+app.use('*', (req, res, next) => {
+  const err = new NotFoundError('The requested resource was not found!');
+  next(err);
 });
 
 app.use(errorLogger);

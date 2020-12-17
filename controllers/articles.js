@@ -5,11 +5,8 @@ const { ForbiddenError } = require('../utils/ForbiddenError.js');
 
 const getArticles = (req, res, next) => {
   Article.find({})
-    .populate('owner')
     .then((data) => {
-      res.status(200).send(
-        data,
-      );
+      res.status(200).send(data);
     })
     .catch((err) => next(err));
 };
@@ -29,7 +26,17 @@ const postArticle = (req, res, next) => {
     keyword, title, text, date, source, link, image, owner: id,
   })
     .then((article) => {
-      res.status(200).send({ data: article });
+      res.status(200).send({
+        data: {
+          keyword: article.keyword,
+          title: article.title,
+          text: article.text,
+          date: article.date,
+          source: article.source,
+          link: article.link,
+          image: article.image,
+        },
+      });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -42,7 +49,7 @@ const postArticle = (req, res, next) => {
 };
 
 const deleteArticle = (req, res, next) => {
-  Article.findById(req.params.articleId)
+  Article.findById(req.params.articleId).select('+owner')
     .orFail(() => {
       const error = new NotFoundError('There is no such article');
       throw error;
@@ -51,7 +58,15 @@ const deleteArticle = (req, res, next) => {
       if (article.owner.toString() === req.user.id) {
         Article.findByIdAndRemove(req.params.articleId)
           .then((articleOne) => {
-            res.status(200).send({ data: articleOne });
+            res.status(200).send({
+              keyword: articleOne.keyword,
+              title: articleOne.title,
+              text: articleOne.text,
+              date: articleOne.date,
+              source: articleOne.source,
+              link: articleOne.link,
+              image: articleOne.image,
+            });
           })
           .catch((err) => {
             if (err.kind === 'ObjectId') {

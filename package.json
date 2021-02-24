@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/KirillKorneev/news-explorer-api/issues"
   },
-  "homepage": "https://github.com/KirillKorneev/news-explorer-api#readme",
+  "homepage": ".",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "celebrate": "^13.0.4",

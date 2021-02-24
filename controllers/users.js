@@ -34,14 +34,14 @@ const newUser = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    const err = new InvalidError('Invalid login or password');
+    const err = new InvalidError('Неверный логин или пароль!');
     throw err;
   }
 
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        const err = new ConflictError('This user already exists');
+        const err = new ConflictError('Такой пользователь уже есть');
         throw err;
       }
       return bcrypt.hash(password, 10);
@@ -71,18 +71,19 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    const error = new InvalidError('Invalid login or password');
+    const error = new InvalidError('Неверный логин или пароль!');
     throw (error);
   }
 
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        const error = new WrongAuth('Invalid login or password');
+        const error = new WrongAuth('Неверный логин или пароль!');
         throw (error);
       }
 
-      bcrypt.compare(password, user.password).then((matched) => {
+      bcrypt.compare(password, user.password)
+      .then((matched) => {
         if (matched) {
           const token = jwt.sign({
             id: user._id,
@@ -91,12 +92,12 @@ const login = (req, res, next) => {
             token,
           });
         }
-        const error = new WrongAuth('Invalid login or password');
+        const error = new WrongAuth('Неверный логин или пароль!');
         throw (error);
       })
-        .catch((err) => {
-          next(err);
-        });
+      .catch((err) => {
+        next(err);
+      });
     })
     .catch((err) => {
       next(err);

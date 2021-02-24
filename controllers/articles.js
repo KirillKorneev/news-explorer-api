@@ -4,9 +4,15 @@ const { InvalidError } = require('../utils/InvalidError.js');
 const { ForbiddenError } = require('../utils/ForbiddenError.js');
 
 const getArticles = (req, res, next) => {
-  Article.find({})
+  Article.find({}).select('+owner')
     .then((data) => {
-      res.status(200).send(data);
+      const yourData = [];
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].owner.toString() === req.user.id) {
+          yourData.push(data[i]);
+        }
+      }
+      res.status(200).send(yourData);
     })
     .catch((err) => next(err));
 };
